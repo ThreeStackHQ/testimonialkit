@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db, widgets, eq, desc } from "@testimonialkit/db";
+import { db, widgets, workspaces, eq, desc, count } from "@testimonialkit/db";
 import { auth } from "@/auth";
+import { PLANS } from "@/lib/stripe";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic";
@@ -54,6 +55,35 @@ export async function POST(req: NextRequest) {
   const workspaceId = (session.user as any).workspaceId as string | null;
   if (!workspaceId) {
     return NextResponse.json({ error: "No workspace" }, { status: 400 });
+  }
+
+  // Plan-based widget limit: Free=1, Indie=5, Pro=unlimited
+  const [workspace] = await db
+    .select({ plan: workspaces.plan })
+    .from(workspaces)
+    .where(eq(workspaces.id, workspaceId))
+    .limit(1);
+
+  if (workspace) {
+    const plan = workspace.plan as keyof typeof PLANS;
+    const widgetLimit = PLANS[plan]?.widgetLimit ?? 1;
+
+    if (widgetLimit !== Infinity) {
+      const [{ value: widgetCount }] = await db
+        .select({ value: count() })
+        .from(widgets)
+        .where(eq(widgets.workspaceId, workspaceId));
+
+      if (widgetCount >= widgetLimit) {
+        const planName = PLANS[plan]?.name ?? plan;
+        return NextResponse.json(
+          {
+            error: `Widget limit reached (${widgetLimit} on ${planName} plan). Upgrade to create more.`,
+          },
+          { status: 402 }
+        );
+      }
+    }
   }
 
   const body = await req.json().catch(() => ({}));

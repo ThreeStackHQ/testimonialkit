@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     if (value >= 10) {
       return NextResponse.json(
         { error: "Testimonial limit reached. Upgrade to Indie for unlimited." },
-        { status: 429 }
+        { status: 402 }
       );
     }
   }

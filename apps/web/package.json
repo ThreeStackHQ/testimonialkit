@@ -10,15 +10,15 @@
   },
   "dependencies": {
     "@testimonialkit/db": "workspace:*",
+    "bcryptjs": "^2.4.3",
+    "lucide-react": "^0.469.0",
     "next": "15.1.7",
+    "next-auth": "5.0.0-beta.25",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next-auth": "5.0.0-beta.25",
-    "bcryptjs": "^2.4.3",
-    "stripe": "^17.7.0",
     "resend": "^4.1.2",
-    "zod": "^3.24.1",
-    "lucide-react": "^0.469.0"
+    "stripe": "^17.7.0",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -28,6 +28,7 @@
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^4.0.18"
   }
 }
