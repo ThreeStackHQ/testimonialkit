@@ -10,6 +10,7 @@ import {
 } from "@testimonialkit/db";
 import { auth } from "@/auth";
 import { z } from "zod";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,23 @@ export async function POST(req: NextRequest) {
 
   if (!apiKey) {
     return NextResponse.json({ error: "Missing X-API-Key header" }, { status: 401 });
+  }
+
+  // SEC-001: Rate limit by IP + API key (10 submissions/minute)
+  const ip = getClientIp(req);
+  const rl = rateLimit(`testimonials:${ip}:${apiKey}`, 10, 60_000);
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: "Too many requests. Please slow down." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
+          "X-RateLimit-Limit": "10",
+          "X-RateLimit-Remaining": "0",
+        },
+      }
+    );
   }
 
   // Find workspace by apiKey

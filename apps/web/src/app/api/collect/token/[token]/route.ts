@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, testimonialTokens, testimonials, eq } from "@testimonialkit/db";
 import { z } from "zod";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,21 @@ export async function POST(
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params;
+
+  // SEC-003: Rate limit by IP + token to prevent brute-force enumeration (20 req/min)
+  const ip = getClientIp(req);
+  const rl = rateLimit(`collect:token:${ip}:${token}`, 20, 60_000);
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
+        },
+      }
+    );
+  }
 
   const [tokenRecord] = await db
     .select()

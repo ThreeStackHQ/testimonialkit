@@ -62,7 +62,7 @@
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
           ${
             t.avatarUrl
-              ? `<img src="${t.avatarUrl}" alt="${t.name}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;" />`
+              ? `<img src="${escapeHtml(t.avatarUrl)}" alt="${escapeHtml(t.name)}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;" />`
               : `<div style="width:44px;height:44px;border-radius:50%;background:${avatarBg};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;">${initials(t.name)}</div>`
           }
           <div>
