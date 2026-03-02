@@ -1,0 +1,6 @@
+{
+  "name": "@testimonialkit/config",
+  "version": "0.1.0",
+  "private": true,
+  "files": ["tsconfig.json", "tailwind.config.js", "eslint.config.js"]
+}
